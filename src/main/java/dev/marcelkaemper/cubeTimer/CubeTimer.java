@@ -1,9 +1,17 @@
 package dev.marcelkaemper.cubeTimer;
 
 
+import javax.sound.sampled.Port;
+
 public class CubeTimer {
 
+    private static GUI gui;
+
     public static void main(String[] args) {
-        GUI gui = new GUI();
+        gui = new GUI();
+    }
+
+    public static GUI getGui() {
+        return gui;
     }
 }
