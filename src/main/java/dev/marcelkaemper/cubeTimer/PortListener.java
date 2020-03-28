@@ -16,25 +16,44 @@ import java.util.Arrays;
 
 public class PortListener {
 
-    private void portListener() {
-        SerialPort comPort = SerialPort.getCommPort("/dev/ttyUSB0");
+    private TimeMeasurer tm = new TimeMeasurer();
+
+    public PortListener(String port) {
+        SerialPort comPort = SerialPort.getCommPort(port);
+        comPort.setBaudRate(9600);
         comPort.openPort();
 
         comPort.addDataListener(new SerialPortDataListener() {
-        @Override
-        public int getListeningEvents() {
-            return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
-        }
-
-        @Override
-        public void serialEvent(SerialPortEvent event) {
-            if(event.getEventType() != SerialPort.LISTENING_EVENT_DATA_AVAILABLE) {
-                return;
+            @Override
+            public int getListeningEvents() {
+                return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
             }
-            byte[] data = new byte[comPort.bytesAvailable()];
-            int numRead = comPort.readBytes(data, data.length);
-            System.out.println(new String(data));
-        }
-    });
+
+            @Override
+            public void serialEvent(SerialPortEvent event) {
+                System.out.println("event");
+                if(event.getEventType() != SerialPort.LISTENING_EVENT_DATA_AVAILABLE) {
+                    return;
+                }
+                byte[] data = new byte[comPort.bytesAvailable()];
+                int numRead = comPort.readBytes(data, data.length);
+
+                String command = new String(data);
+                command = command.replace("\n", "").replace("\r", "");
+
+                System.out.println(command);
+
+                if(command.equals("tmr_start")) {
+                    tm.startTimer();
+                }else if(command.equals("tmr_stop")) {
+                    tm.endTimer();
+                }
+            }
+        });
+    }
+
+
+    public static SerialPort[] getPorts() {
+        return SerialPort.getCommPorts();
     }
 }
